@@ -1,4 +1,5 @@
 // app/reviews/loading.tsx
+'use client'
 import React from 'react';
 import { Flex, Spinner, Text, VStack } from '@chakra-ui/react';
 import AppLayout from '@/components/layout/AppLayout';

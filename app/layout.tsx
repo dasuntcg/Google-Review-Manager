@@ -1,10 +1,12 @@
 // app/layout.tsx
+
+'use client'
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
 import { Inter } from 'next/font/google';
 import theme from '@/lib/theme';
 import './globals.css';
-import type { Metadata } from 'next';
+
 
 // Initialize the Inter font
 const inter = Inter({ 
@@ -13,10 +15,7 @@ const inter = Inter({
   variable: '--font-inter'
 });
 
-export const metadata: Metadata = {
-  title: 'Google Review Manager',
-  description: 'Manage and distribute Google reviews to your websites',
-};
+
 
 export default function RootLayout({
   children,

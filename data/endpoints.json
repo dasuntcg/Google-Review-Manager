@@ -1,0 +1,14 @@
+[
+  {
+    "id": "website1",
+    "name": "Main Website",
+    "url": "https://example.com/api/reviews",
+    "active": true
+  },
+  {
+    "id": "website2",
+    "name": "Landing Page",
+    "url": "https://landing.example.com/api/testimonials",
+    "active": false
+  }
+]

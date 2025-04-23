@@ -1,5 +1,5 @@
 // lib/theme.ts
-import { extendTheme } from '@chakra-ui/react';
+import { extendTheme } from '@chakra-ui/theme-utils';
 
 // Extend the Chakra UI theme for custom styles
 const theme = extendTheme({

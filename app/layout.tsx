@@ -1,5 +1,6 @@
 // app/layout.tsx
-import { ChakraProvider } from '@chakra-ui/react';
+import { CacheProvider } from '@chakra-ui/next-js'
+import { ChakraProvider } from '@chakra-ui/react'
 import { Inter } from 'next/font/google';
 import theme from '@/lib/theme';
 import './globals.css';

@@ -1,14 +1,15 @@
+// hooks/use-reviews.ts
 'use client'
 
 import { useState } from 'react';
 import axios from 'axios';
-import { Review, DistributionResult } from '@/lib/types';
+import { Review } from '@/lib/types';
 
 const useReviews = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all reviews from local database
+  // Fetch all reviews from database
   const fetchStoredReviews = async (): Promise<Review[]> => {
     setLoading(true);
     setError(null);
@@ -32,11 +33,11 @@ const useReviews = () => {
     
     try {
       // First fetch from Google API
-      const reviewsResponse = await axios.get<Review[]>('/api/reviews/fetch');
+      const reviewsResponse = await axios.get('/api/reviews/fetch');
       const newReviews = reviewsResponse.data;
       
-      // Then store them (this will merge with existing reviews)
-      const saveResponse = await axios.post<Review[]>('/api/reviews/manage', newReviews);
+      // Then store them in our database
+      const saveResponse = await axios.post('/api/reviews/manage', newReviews);
       
       setLoading(false);
       return saveResponse.data;
@@ -69,34 +70,12 @@ const useReviews = () => {
     }
   };
 
-  // Distribute reviews to endpoints
-  // const distributeReviews = async (reviewIds: string[], endpointIds: string[]): Promise<DistributionResult | null> => {
-  //   setLoading(true);
-  //   setError(null);
-    
-  //   try {
-  //     const response = await axios.post<DistributionResult>('/api/reviews/distribute', {
-  //       reviewIds,
-  //       endpointIds
-  //     });
-      
-  //     setLoading(false);
-  //     return response.data;
-  //   } catch (err) {
-  //     const errorMessage = err instanceof Error ? err.message : 'Failed to distribute reviews';
-  //     setError(errorMessage);
-  //     setLoading(false);
-  //     return null;
-  //   }
-  // };
-
   return {
     loading,
     error,
     fetchStoredReviews,
     fetchNewReviews,
-    updateReviewStatus,
-    // distributeReviews
+    updateReviewStatus
   };
 };
 

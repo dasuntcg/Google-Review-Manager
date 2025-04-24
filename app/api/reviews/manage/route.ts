@@ -1,45 +1,17 @@
 // app/api/reviews/manage/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import prisma from '@/lib/prisma';
 import { Review } from '@/lib/types';
-
-// Path to our mock database file
-const dbPath = path.join(process.cwd(), 'data', 'reviews.json');
-
-// Ensure the data directory exists
-const ensureDbExists = () => {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
-  }
-  if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify([], null, 2));
-  }
-};
-
-// Get all reviews from our "database"
-const getReviews = (): Review[] => {
-  ensureDbExists();
-  try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading reviews file:', error);
-    return [];
-  }
-};
-
-// Save reviews to our "database"
-const saveReviews = (reviews: Review[]): void => {
-  ensureDbExists();
-  fs.writeFileSync(dbPath, JSON.stringify(reviews, null, 2));
-};
 
 // GET - Return all reviews
 export async function GET() {
   try {
-    const reviews = getReviews();
+    const reviews:Review[] = await prisma.review.findMany({
+      orderBy: {
+        time: 'desc'
+      }
+    });
+    
     return NextResponse.json(reviews);
   } catch (error) {
     console.error('Error getting reviews:', error);
@@ -55,7 +27,19 @@ export async function POST(request: NextRequest) {
   try {
     const newReviews = await request.json();
     console.log('New reviews:', newReviews);
-    const reviewsArray = newReviews.result.reviews;
+    
+    // Handle both formats: direct array or nested under result.reviews
+    let reviewsArray;
+    if (newReviews.result && newReviews.result.reviews) {
+      reviewsArray = newReviews.result.reviews;
+    } else if (Array.isArray(newReviews)) {
+      reviewsArray = newReviews;
+    } else {
+      return NextResponse.json(
+        { message: 'Expected reviews data in a valid format' },
+        { status: 400 }
+      );
+    }
     
     if (!Array.isArray(reviewsArray)) {
       return NextResponse.json(
@@ -64,44 +48,61 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Get existing reviews
-    const existingReviews = getReviews();
-    
-    // Merge and deduplicate reviews based on id (timestamp)
-    const reviewMap = new Map<string, Review>();
-    
-    // Add existing reviews to the map
-    existingReviews.forEach(review => {
-      reviewMap.set(review.id, review);
-    });
-    
-    // Add or update with new reviews
-    reviewsArray.forEach(review => {
-      // If review already exists, keep its status and other custom fields
-      if (reviewMap.has(review.id)) {
-        const existingReview = reviewMap.get(review.id);
-        if (existingReview) {
-          reviewMap.set(review.id, { 
-            ...review,
-            status: existingReview.status || 'new',
-            dateAdded: existingReview.dateAdded || new Date().toISOString(),
-          });
+    // Get existing review IDs
+    const existingReviewIds = await prisma.review.findMany({
+      where: {
+        id: {
+          in: reviewsArray.map(review => review.id)
         }
-      } else {
-        // Otherwise, add as a new review
-        reviewMap.set(review.id, { 
-          ...review, 
-          status: 'new',
-          dateAdded: new Date().toISOString(),
-        });
+      },
+      select: {
+        id: true,
+        status: true,
+        dateAdded: true
       }
     });
     
-    // Convert map back to array
-    const updatedReviews = Array.from(reviewMap.values());
+    // Create a map for easier lookup
+    const existingMap = new Map();
+    existingReviewIds.forEach((review: { id: string; status: string; dateAdded: Date }) => {
+      existingMap.set(review.id, review);
+    });
     
-    // Save to "database"
-    saveReviews(updatedReviews);
+    // Process each review using upsert
+    for (const review of reviewsArray) {
+      const existing = existingMap.get(review.id);
+      
+      await prisma.review.upsert({
+        where: { id: review.id },
+        update: {
+          author_name: review.author_name,
+          rating: review.rating,
+          text: review.text,
+          time: review.time,
+          profile_photo_url: review.profile_photo_url || '',
+          // Keep existing status and dateAdded if they exist
+          status: existing ? existing.status : 'new',
+          dateAdded: existing ? existing.dateAdded : new Date()
+        },
+        create: {
+          id: review.id,
+          author_name: review.author_name,
+          rating: review.rating,
+          text: review.text,
+          time: review.time,
+          profile_photo_url: review.profile_photo_url || '',
+          status: 'new',
+          dateAdded: new Date()
+        }
+      });
+    }
+    
+    // Fetch all reviews to return the updated list
+    const updatedReviews = await prisma.review.findMany({
+      orderBy: {
+        time: 'desc'
+      }
+    });
     
     return NextResponse.json(updatedReviews);
   } catch (error) {
@@ -125,23 +126,24 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const reviews = getReviews();
-    const reviewIndex = reviews.findIndex(review => review.id === id);
-    
-    if (reviewIndex === -1) {
-      return NextResponse.json(
-        { message: 'Review not found' },
-        { status: 404 }
-      );
+    try {
+      // Update the review
+      const updatedReview = await prisma.review.update({
+        where: { id },
+        data: { status }
+      });
+      
+      return NextResponse.json(updatedReview);
+    } catch (error) {
+      // If review not found
+      if (error.code === 'P2025') {
+        return NextResponse.json(
+          { message: 'Review not found' },
+          { status: 404 }
+        );
+      }
+      throw error;
     }
-    
-    // Update the review status
-    reviews[reviewIndex].status = status as 'new' | 'published' | 'unpublished';
-    
-    // Save updated reviews
-    saveReviews(reviews);
-    
-    return NextResponse.json(reviews[reviewIndex]);
   } catch (error) {
     console.error('Error updating review:', error);
     return NextResponse.json(

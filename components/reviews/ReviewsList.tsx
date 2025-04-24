@@ -244,13 +244,7 @@ const ReviewsList: React.FC = () => {
             Fetch New Reviews
           </Button>
           
-          <Button 
-            colorScheme="green" 
-            onClick={handleBulkDistribute}
-            isDisabled={selectedReviews.length === 0}
-          >
-            Distribute Selected ({selectedReviews.length})
-          </Button>
+         
         </HStack>
       </Flex>
       
@@ -350,56 +344,7 @@ const ReviewsList: React.FC = () => {
         </SimpleGrid>
       )}
       
-      {/* Distribution modal */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Distribute Reviews</ModalHeader>
-          <ModalCloseButton />
-          
-          <ModalBody>
-            <VStack align="start" spacing={4}>
-              <Text>
-                Select where you want to distribute {selectedReviews.length} reviews:
-              </Text>
-              
-              {endpoints.length === 0 ? (
-                <Alert status="warning">
-                  <AlertIcon />
-                  No distribution endpoints configured. Please add endpoints first.
-                </Alert>
-              ) : (
-                <VStack align="start" spacing={2} width="100%">
-                  {endpoints.map(endpoint => (
-                    <Checkbox 
-                      key={endpoint.id}
-                      isChecked={selectedEndpoints.includes(endpoint.id)}
-                      onChange={() => toggleEndpointSelection(endpoint.id)}
-                      isDisabled={!endpoint.active}
-                    >
-                      {endpoint.name} {!endpoint.active && "(inactive)"}
-                    </Checkbox>
-                  ))}
-                </VStack>
-              )}
-            </VStack>
-          </ModalBody>
-          
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button 
-              colorScheme="green" 
-              onClick={() => handleDistribute(selectedReviews)}
-              isDisabled={selectedEndpoints.length === 0}
-              isLoading={reviewsHook.loading}
-            >
-              Distribute Now
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+     
     </Box>
   );
 };

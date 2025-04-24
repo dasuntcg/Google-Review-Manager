@@ -159,14 +159,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
             </MenuList>
           </Menu>
           
-          <Button 
-            colorScheme="green" 
-            size="sm"
-            onClick={handleDistribute}
-            isDisabled={review.status === 'published'}
-          >
-            Distribute
-          </Button>
+         
         </HStack>
       </Flex>
     </Box>

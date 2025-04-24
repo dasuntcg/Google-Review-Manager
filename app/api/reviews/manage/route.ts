@@ -54,8 +54,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const newReviews = await request.json();
+    console.log('New reviews:', newReviews);
+    const reviewsArray = newReviews.result.reviews;
     
-    if (!Array.isArray(newReviews)) {
+    if (!Array.isArray(reviewsArray)) {
       return NextResponse.json(
         { message: 'Expected an array of reviews' },
         { status: 400 }
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Add or update with new reviews
-    newReviews.forEach(review => {
+    reviewsArray.forEach(review => {
       // If review already exists, keep its status and other custom fields
       if (reviewMap.has(review.id)) {
         const existingReview = reviewMap.get(review.id);

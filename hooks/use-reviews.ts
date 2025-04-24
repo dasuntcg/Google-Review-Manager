@@ -70,25 +70,25 @@ const useReviews = () => {
   };
 
   // Distribute reviews to endpoints
-  const distributeReviews = async (reviewIds: string[], endpointIds: string[]): Promise<DistributionResult | null> => {
-    setLoading(true);
-    setError(null);
+  // const distributeReviews = async (reviewIds: string[], endpointIds: string[]): Promise<DistributionResult | null> => {
+  //   setLoading(true);
+  //   setError(null);
     
-    try {
-      const response = await axios.post<DistributionResult>('/api/reviews/distribute', {
-        reviewIds,
-        endpointIds
-      });
+  //   try {
+  //     const response = await axios.post<DistributionResult>('/api/reviews/distribute', {
+  //       reviewIds,
+  //       endpointIds
+  //     });
       
-      setLoading(false);
-      return response.data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to distribute reviews';
-      setError(errorMessage);
-      setLoading(false);
-      return null;
-    }
-  };
+  //     setLoading(false);
+  //     return response.data;
+  //   } catch (err) {
+  //     const errorMessage = err instanceof Error ? err.message : 'Failed to distribute reviews';
+  //     setError(errorMessage);
+  //     setLoading(false);
+  //     return null;
+  //   }
+  // };
 
   return {
     loading,
@@ -96,7 +96,7 @@ const useReviews = () => {
     fetchStoredReviews,
     fetchNewReviews,
     updateReviewStatus,
-    distributeReviews
+    // distributeReviews
   };
 };
 

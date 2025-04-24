@@ -71,9 +71,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <NavItem href="/reviews" currentPath={pathname}>
                 Reviews
               </NavItem>
-              <NavItem href="/endpoints" currentPath={pathname}>
-                Endpoints
-              </NavItem>
+              
               <NavItem href="/settings" currentPath={pathname}>
                 Settings
               </NavItem>

@@ -381,62 +381,7 @@ const Dashboard: React.FC = () => {
             </CardBody>
           </Card>
           
-          <Card>
-            <CardHeader pb={0}>
-              <Flex justify="space-between" align="center">
-                <Heading size="md">Distribution Endpoints</Heading>
-                <Button
-                  as={Link}
-                  href="/endpoints"
-                  size="sm"
-                  rightIcon={<ExternalLinkIcon />}
-                  variant="ghost"
-                >
-                  Manage
-                </Button>
-              </Flex>
-            </CardHeader>
-            
-            <CardBody>
-              {endpoints.length === 0 ? (
-                <Text textAlign="center" py={4} color="gray.500">
-                  No endpoints configured
-                </Text>
-              ) : (
-                <VStack align="stretch" spacing={3}>
-                  {endpoints.map((endpoint, index) => (
-                    <Box key={endpoint.id}>
-                      <Flex justify="space-between" align="center">
-                        <Text fontWeight="medium">{endpoint.name}</Text>
-                        <Box
-                          w={3}
-                          h={3}
-                          borderRadius="full"
-                          bg={endpoint.active ? "green.400" : "gray.300"}
-                        />
-                      </Flex>
-                      <Text fontSize="sm" color="gray.500" noOfLines={1}>
-                        {endpoint.url}
-                      </Text>
-                      {index < endpoints.length - 1 && <Divider mt={3} />}
-                    </Box>
-                  ))}
-                </VStack>
-              )}
-            </CardBody>
-            
-            <CardFooter pt={0}>
-              <Button 
-                width="full" 
-                colorScheme="blue" 
-                as={Link} 
-                href="/endpoints"
-                variant={endpoints.length === 0 ? "solid" : "outline"}
-              >
-                {endpoints.length === 0 ? "Add Your First Endpoint" : "Manage Endpoints"}
-              </Button>
-            </CardFooter>
-          </Card>
+          
         </GridItem>
       </Grid>
     </Box>

@@ -136,7 +136,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(updatedReview);
     } catch (error) {
       // If review not found
-      if (error.code === 'P2025') {
+      if ((error as any).code === 'P2025') {
         return NextResponse.json(
           { message: 'Review not found' },
           { status: 404 }

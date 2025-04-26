@@ -32,7 +32,7 @@ export async function GET() {
     
     // Process each review
     let newReviewsCount = 0;
-    let updatedReviewsCount = 0;
+ 
     
     for (const review of fetchedReviews) {
       const reviewId = String(review.time);

@@ -6,7 +6,7 @@ import { Review } from '@/lib/types';
 // GET - Return all reviews
 export async function GET() {
   try {
-    const reviews:Review[] = await prisma.review.findMany({
+    const reviews = await prisma.review.findMany({
       orderBy: {
         time: 'desc'
       }

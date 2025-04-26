@@ -160,7 +160,7 @@ const SettingsForm: React.FC = () => {
             }
 
             // Store in localStorage
-            localStorage.setItem('reviewManagerSettings', JSON.stringify(settings));
+            // localStorage.setItem('reviewManagerSettings', JSON.stringify(settings));
 
             // Update environment variable (in a real app, this would be a server-side update)
             // For this demo, we'll simulate by using localStorage

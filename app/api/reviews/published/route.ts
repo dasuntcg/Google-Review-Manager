@@ -1,25 +1,6 @@
 // app/api/reviews/published/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { Review } from '@/lib/types';
-
-// Path to our reviews database file
-const dbPath = path.join(process.cwd(), 'data', 'reviews.json');
-
-// Get all reviews from our "database"
-const getReviews = (): Review[] => {
-  if (!fs.existsSync(dbPath)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading reviews file:', error);
-    return [];
-  }
-};
+import prisma from '@/lib/prisma';
 
 // API key validation (you would implement a more secure solution in production)
 const validateApiKey = (apiKey: string | null): boolean => {
@@ -42,32 +23,43 @@ export async function GET(request: NextRequest) {
 
     // Get filter parameters from URL
     const { searchParams } = new URL(request.url);
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
-    const minRating = searchParams.get('minRating') ? parseInt(searchParams.get('minRating')!) : undefined;
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam) : undefined;
+    const minRatingParam = searchParams.get('minRating');
+    const minRating = minRatingParam ? parseInt(minRatingParam) : undefined;
     const category = searchParams.get('category') || undefined;
     
-    // Get all reviews
-    const allReviews = getReviews();
+    // Build the where clause for filtering
+    const where = {
+      status: 'published',
+      ...(minRating && { rating: { gte: minRating } }),
+      // You can add category filtering here if needed
+    };
     
-    // Filter only published reviews
-    let publishedReviews = allReviews.filter(review => review.status === 'published');
+    // Get total count of matching reviews
+    const total = await prisma.review.count({
+      where
+    });
     
-    // Apply additional filters if provided
-    if (minRating) {
-      publishedReviews = publishedReviews.filter(review => review.rating >= minRating);
-    }
+    // Get filtered reviews
+    const publishedReviews = await prisma.review.findMany({
+      where,
+      orderBy: {
+        time: 'desc'
+      },
+      ...(limit && { take: limit }),
+    });
     
-    
-    // Apply limit if provided
-    if (limit && limit > 0) {
-      publishedReviews = publishedReviews.slice(0, limit);
-    }
-    
-    // Return the published reviews as JSON
-    return NextResponse.json({
-      total: publishedReviews.length,
+    // Create response with cache headers for better performance
+    const response = NextResponse.json({
+      total,
       reviews: publishedReviews
     });
+    
+    // Cache for 1 hour but revalidate every minute
+    response.headers.set('Cache-Control', 's-maxage=3600, stale-while-revalidate=60');
+    
+    return response;
   } catch (error) {
     console.error('Error retrieving published reviews:', error);
     return NextResponse.json(

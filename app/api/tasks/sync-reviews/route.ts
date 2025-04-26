@@ -139,31 +139,31 @@ export async function GET(request: NextRequest) {
     });
     
     // Auto-distribute if enabled
-    if (settings.autoDistribute && newReviews.length > 0) {
-      const highRatedReviews = newReviews.filter(review => review.rating >= settings.minRating);
+    // if (settings.autoDistribute && newReviews.length > 0) {
+    //   const highRatedReviews = newReviews.filter(review => review.rating >= settings.minRating);
       
-      if (highRatedReviews.length > 0 && settings.defaultEndpoints.length > 0) {
-        // Get active endpoints
-        const allEndpoints = getEndpoints();
-        const activeEndpoints = allEndpoints.filter(endpoint => 
-          settings.defaultEndpoints.includes(endpoint.id) && endpoint.active
-        );
+    //   if (highRatedReviews.length > 0 && settings.defaultEndpoints.length > 0) {
+    //     // Get active endpoints
+    //     const allEndpoints = getEndpoints();
+    //     const activeEndpoints = allEndpoints.filter(endpoint => 
+    //       settings.defaultEndpoints.includes(endpoint.id) && endpoint.active
+    //     );
         
-        if (activeEndpoints.length > 0) {
-          // Mark reviews as published
-          highRatedReviews.forEach(review => {
-            const mapReview = reviewMap.get(review.id);
-            if (mapReview) {
-              mapReview.status = 'published';
-            }
-          });
+    //     if (activeEndpoints.length > 0) {
+    //       // Mark reviews as published
+    //       highRatedReviews.forEach(review => {
+    //         const mapReview = reviewMap.get(review.id);
+    //         if (mapReview) {
+    //           mapReview.status = 'published';
+    //         }
+    //       });
           
-          // In a real app, you would make API calls to distribute these reviews
-          // For this demo, we'll just simulate that it happened
-          console.log(`Auto-distributed ${highRatedReviews.length} reviews to ${activeEndpoints.length} endpoints`);
-        }
-      }
-    }
+    //       // In a real app, you would make API calls to distribute these reviews
+    //       // For this demo, we'll just simulate that it happened
+    //       console.log(`Auto-distributed ${highRatedReviews.length} reviews to ${activeEndpoints.length} endpoints`);
+    //     }
+    //   }
+    // }
     
     // Convert map back to array and save
     const updatedReviews = Array.from(reviewMap.values());

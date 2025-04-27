@@ -1,60 +1,68 @@
 // app/api/reviews/fetch/route.ts
-import { NextResponse } from 'next/server';
-import axios from 'axios';
-import { Review } from '@/lib/types';
+import { NextRequest, NextResponse } from 'next/server'
+import { google } from 'googleapis'
+import { parse } from 'cookie'
+import { Review } from '@/lib/types'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Get API credentials from environment variables
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-    const placeId = process.env.GOOGLE_PLACE_ID;
-    
-    // Check if credentials exist
-    if (!apiKey || !placeId) {
+    // 1. Read OAuth tokens from our secure cookie
+    const cookieHeader = request.headers.get('cookie') || ''
+    const { googTokens } = parse(cookieHeader)
+    if (!googTokens) {
       return NextResponse.json(
-        { message: 'Missing API credentials. Please set GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID in environment variables.' },
-        { status: 500 }
-      );
+        { message: 'Not authenticated. Please sign in first.' },
+        { status: 401 }
+      )
     }
 
-    // Make a request to Google Places API
-    const { data } = await axios.get(
-      'https://maps.googleapis.com/maps/api/place/details/json',
-      {
-        params: {
-          place_id: placeId,
-          fields: 'reviews',
-          key: apiKey,
-        },
-      }
-    );
+    // 2. Parse and set credentials
+    let tokens: any
+    try {
+      tokens = JSON.parse(googTokens)
+    } catch {
+      return NextResponse.json(
+        { message: 'Invalid token data. Please re-authenticate.' },
+        { status: 400 }
+      )
+    }
+    const oauth2Client = new google.auth.OAuth2()
+    oauth2Client.setCredentials(tokens)
 
-    console.log('Google Places response:', JSON.stringify(data, null, 2));
+    // 3. Hard-code your account & location IDs here
+    const accountId  = 'YOUR_ACCOUNT_ID'   // ← e.g. '1234567890'
+    const locationId = 'YOUR_LOCATION_ID'  // ← e.g. '0987654321'
 
-    // Extract and augment reviews
-    const rawReviews = data.result?.reviews ?? [];
-    const reviewsWithStatus: Review[] = rawReviews.map((r: any) => ({
+    // 4. Initialise the Business Profile API client
+    const mybusiness = google.mybusiness({ version: 'v4', auth: oauth2Client })
+
+    // 5. Fetch the reviews, newest first
+    const res = await mybusiness.accounts.locations.reviews.list({
+      parent: `accounts/${accountId}/locations/${locationId}`,
+      pageSize: 50,
+      orderBy: 'updateTime desc',
+    })
+    const rawReviews = res.data.reviews || []
+
+    // 6. Map into your Review type and add status/dateAdded
+    const reviewsWithStatus: Review[] = rawReviews.map(r => ({
       ...r,
-      id: String(r.time),             // timestamp as ID
-      status: 'new' as const,         // default status
-      dateAdded: new Date().toISOString(),
-    }));
+      id:         r.reviewId ?? String(Date.now()),
+      status:     'new',
+      dateAdded:  new Date().toISOString(),
+    }))
 
-    // Rebuild the payload to mirror Google's structure
-    const formatted = {
-      html_attributions: data.html_attributions || [],
-      result: {
-        reviews: reviewsWithStatus,
-      },
-      status: data.status || 'OK',
-    };
-
-    return NextResponse.json(formatted);
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
+    // 7. Return in the same shape as before
+    return NextResponse.json({
+      html_attributions: [] as string[],
+      result: { reviews: reviewsWithStatus },
+      status: 'OK',
+    })
+  } catch (err) {
+    console.error('Error fetching reviews:', err)
     return NextResponse.json(
-      { message: 'Failed to fetch reviews', error: error instanceof Error ? error.message : 'Unknown error' },
+      { message: 'Failed to fetch reviews', error: (err as Error).message },
       { status: 500 }
-    );
+    )
   }
 }

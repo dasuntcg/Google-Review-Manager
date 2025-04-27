@@ -75,6 +75,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <NavItem href="/settings" currentPath={pathname}>
                 Settings
               </NavItem>
+
+              <NavItem href="/api/auth/google" currentPath={pathname}>
+              Sign in with Google
+              </NavItem>
             </HStack>
           </Flex>
         </Container>

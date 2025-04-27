@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     });
     
     // Cache for 1 hour but revalidate every minute
-    response.headers.set('Cache-Control', 's-maxage=3600, stale-while-revalidate=60');
+    response.headers.set('Cache-Control', 'no-store');
     
     return response;
   } catch (error) {

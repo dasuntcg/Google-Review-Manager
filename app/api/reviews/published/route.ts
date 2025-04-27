@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 // API key validation (you would implement a more secure solution in production)
 const validateApiKey = (apiKey: string | null): boolean => {
   // Replace this with your actual API key validation logic
-  const validApiKey = process.env.API_KEY || 'your-api-key-here';
+  const validApiKey = 'your-api-key-here';
   return apiKey === validApiKey;
 };
 

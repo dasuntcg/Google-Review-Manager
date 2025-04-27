@@ -24,7 +24,7 @@ import { Review } from '@/lib/types';
 interface ReviewCardProps {
   review: Review;
   onStatusChange: (reviewId: string, newStatus: string) => void;
-  onDistribute: (reviewId: string) => void;
+ 
   onSelect: (reviewId: string) => void;
   isSelected: boolean;
   selectedEndpoints: string[];
@@ -51,7 +51,7 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
 const ReviewCard: React.FC<ReviewCardProps> = ({ 
   review, 
   onStatusChange, 
-  onDistribute, 
+ 
   onSelect, 
   isSelected, 
   selectedEndpoints 
@@ -70,20 +70,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
   };
   
   // Handle distribute click
-  const handleDistribute = () => {
-    if (selectedEndpoints.length === 0) {
-      toast({
-        title: 'No endpoints selected',
-        description: 'Please select at least one endpoint to distribute to',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    
-    onDistribute(review.id);
-  };
+  
   
   // Handle selection toggle
   const handleSelect = () => {

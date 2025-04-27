@@ -136,44 +136,44 @@ const ReviewsList: React.FC = () => {
   };
   
   // Handle distribute
-  const handleDistribute = async (reviewIds: string[]) => {
-    try {
-      const result = await reviewsHook.distributeReviews(
-        reviewIds, 
-        selectedEndpoints
-      );
+  // const handleDistribute = async (reviewIds: string[]) => {
+  //   try {
+  //     const result = await reviewsHook.distributeReviews(
+  //       reviewIds, 
+  //       selectedEndpoints
+  //     );
       
-      if (result) {
-        // Update local state to mark reviews as published
-        setReviews(reviews.map(review => 
-          reviewIds.includes(review.id) 
-            ? { ...review, status: 'published' } 
-            : review
-        ));
+  //     if (result) {
+  //       // Update local state to mark reviews as published
+  //       setReviews(reviews.map(review => 
+  //         reviewIds.includes(review.id) 
+  //           ? { ...review, status: 'published' } 
+  //           : review
+  //       ));
         
-        // Reset selections
-        setSelectedReviews([]);
-        setSelectedEndpoints([]);
-        onClose();
+  //       // Reset selections
+  //       setSelectedReviews([]);
+  //       setSelectedEndpoints([]);
+  //       onClose();
         
-        toast({
-          title: 'Reviews distributed',
-          description: `Successfully distributed ${result.distributed} reviews to ${result.endpoints} endpoints`,
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Error distributing reviews',
-        description: error instanceof Error ? error.message : 'Something went wrong',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
+  //       toast({
+  //         title: 'Reviews distributed',
+  //         description: `Successfully distributed ${result.distributed} reviews to ${result.endpoints} endpoints`,
+  //         status: 'success',
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: 'Error distributing reviews',
+  //       description: error instanceof Error ? error.message : 'Something went wrong',
+  //       status: 'error',
+  //       duration: 5000,
+  //       isClosable: true,
+  //     });
+  //   }
+  // };
   
   // Handle bulk distribute
   const handleBulkDistribute = () => {
@@ -335,7 +335,7 @@ const ReviewsList: React.FC = () => {
               key={review.id} 
               review={review}
               onStatusChange={handleStatusChange}
-              onDistribute={(reviewId) => handleDistribute([reviewId])}
+              
               onSelect={toggleReviewSelection}
               isSelected={selectedReviews.includes(review.id)}
               selectedEndpoints={selectedEndpoints}
